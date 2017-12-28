@@ -17,12 +17,15 @@ $lightbox_module_enabled = true;
 function lightbox_module_scripts() {
   // Poptrox
 	wp_enqueue_script( 'lightbox-module-poptrox', plugins_url( 'assets/js/jquery.poptrox.min.js', __FILE__ ), array( 'jquery' ), '2.5.2-dev', true );
+
+	// Lightbox Style
+	wp_enqueue_style( 'lightbox-module-style', plugins_url( 'assets/css/lightbox.css', __FILE__ ) );
 }
 add_action( 'wp_enqueue_scripts', 'lightbox_module_scripts' );
 
-function generate_lightbox_shortcodes( $text_domain, $container, $container_class, $from_indicator, $item_container, $item_class, $link_class, $title, $description ) {
+function generate_lightbox_shortcodes( $text_domain, $container, $container_class, $from_indicator, $small_screen_name, $item_container, $item_class, $link_class, $thumb, $title, $description ) {
 	// Gallery Shortcode
-	add_filter( 'post_gallery', function( $string, $attr ) use( $text_domain, $container, $container_class, $from_indicator, $item_container, $item_class, $link_class, $title, $description ) {
+	add_filter( 'post_gallery', function( $string, $attr ) use( $text_domain, $container, $container_class, $from_indicator, $small_screen_name, $item_container, $item_class, $link_class, $thumb, $title, $description ) {
 		$output = '<' . $container . ( $container_class ? ' class="' . $container_class . '">' : '>' );
 		$posts = get_posts( array( 'include' => $attr[ 'ids' ], 'post_type' => 'attachment' ) );
 		$gallery_counter = 0;
@@ -34,11 +37,11 @@ function generate_lightbox_shortcodes( $text_domain, $container, $container_clas
 			if( $from_indicator ) {
 				$output .= '<' . $item_container . ' class="from-' . ( $gallery_counter % 2 === 0 ? 'right' : 'left' ) . ( $item_class ? ' ' . $item_class : '' ) . '">';
 			} else {
-				$output .= '<' . $item_container . ' class="6u' . ( $gallery_counter % 2 === 0 ? '$' : '' ) . ' 12u$(xsmall)' . ( $item_class ? ' ' . $item_class : '' ) . '">';
+				$output .= '<' . $item_container . ' class="6u' . ( $gallery_counter % 2 === 0 ? '$' : '' ) . ' 12u$(' . $small_screen_name . ')' . ( $item_class ? ' ' . $item_class : '' ) . '">';
 			}
 
 			$output .= '<a href="' . $attachment->guid . '"' . ( $link_class ? ' class="' . $link_class . '">' : '>' );
-			$output .= '<img src="' . wp_get_attachment_image_src( $imagePost->ID, $text_domain . '-thumb' )[0] . '" alt="' . $attachment->post_title . '" />';
+			$output .= '<img src="' . ( $thumb ? wp_get_attachment_image_src( $imagePost->ID, $text_domain . '-thumb' )[0] : wp_get_attachment_image_src( $imagePost->ID )[0] ) . '" alt="' . $attachment->post_title . '" />';
 			$output .= '</a>';
 
 			if( $title ) {
@@ -70,7 +73,7 @@ function generate_lightbox_shortcodes( $text_domain, $container, $container_clas
 	// }
 
 	// Vimeo Shortcode
-	add_shortcode( 'vimeo_gallery', function( $atts ) use( $text_domain, $container, $container_class, $from_indicator, $item_container, $item_class, $link_class, $title, $description ) {
+	add_shortcode( 'vimeo_gallery', function( $atts ) use( $text_domain, $container, $container_class, $from_indicator, $small_screen_name, $item_container, $item_class, $link_class, $thumb, $title, $description ) {
 		$a = shortcode_atts( array(
 				'ids' => '',
 		), $atts );
@@ -87,7 +90,7 @@ function generate_lightbox_shortcodes( $text_domain, $container, $container_clas
 			if( $from_indicator ) {
 				$output .= '<' . $item_container . ' class="from-' . ( $gallery_counter % 2 === 0 ? 'right' : 'left' ) . ( $item_class ? ' ' . $item_class : '' ) . '">';
 			} else {
-				$output .= '<' . $item_container . ' class="6u' . ( $gallery_counter % 2 === 0 ? '$' : '' ) . ' 12u$(xsmall)' . ( $item_class ? ' ' . $item_class : '' ) . '">';
+				$output .= '<' . $item_container . ' class="6u' . ( $gallery_counter % 2 === 0 ? '$' : '' ) . ' 12u$(' .  $small_screen_name . ')' . ( $item_class ? ' ' . $item_class : '' ) . '">';
 			}
 
 			$output .= '<a href="' . $hash[0]->url . '" data-poptrox="vimeo,800x480"' . ( $link_class ? ' class="' . $link_class . '">' : '>' );
